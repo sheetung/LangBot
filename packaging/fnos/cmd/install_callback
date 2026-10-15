@@ -35,6 +35,11 @@ export UV_CACHE_DIR="${DATA_DIR}/.cache/uv"
 # Never download a managed CPython (the download host is unreachable on many
 # NAS networks); use the distro Python only — fail loudly if it is missing.
 export UV_PYTHON_DOWNLOADS=never
+# Tsinghua TUNA PyPI mirror (complete mirror, has langbot-plugin 0.7.11);
+# much faster than files.pythonhosted.org from China NAS networks.
+# HTTP timeout turns a dead connection into a fast retry.
+export UV_DEFAULT_INDEX="https://pypi.tuna.tsinghua.edu.cn/simple"
+export UV_HTTP_TIMEOUT=60
 mkdir -p "${HOME}" "${UV_CACHE_DIR}" || {
     echo "Data share not writable: ${DATA_DIR}" > "${TRIM_TEMP_LOGFILE}"
     exit 1
@@ -150,7 +155,9 @@ if [ ! -d "${VENV_DIR}" ]; then
 fi
 
 # --- Sync dependencies (install into the relocated venv) ---
-if ! UV_PROJECT_ENVIRONMENT="${VENV_DIR}" "${UV_BIN}" sync --extra seekdb >> "${DEBUG_LOG}" 2>&1; then
+# --no-dev: skip the dev dependency group (pytest, pytest-cov, moto, etc.);
+# the runtime needs only the main dependency set (+seekdb extra).
+if ! UV_PROJECT_ENVIRONMENT="${VENV_DIR}" "${UV_BIN}" sync --no-dev --extra seekdb >> "${DEBUG_LOG}" 2>&1; then
     echo "Dependency sync failed. Check network connectivity. See ${DEBUG_LOG}" > "${TRIM_TEMP_LOGFILE}"
     exit 1
 fi

@@ -73,6 +73,13 @@ rsync -a \
 [ -d "${FPK_DIR}/app/langbot/web/dist" ] || { echo "ERROR: web/dist missing after rsync!" >&2; exit 1; }
 echo "    Source synced ($(du -sh "${FPK_DIR}/app/langbot" | cut -f1))"
 
+# Narrow requires-python to <3.13 in the packaged copy only: uv's universal
+# resolver otherwise evaluates the Python 3.14 split, where langbot-plugin
+# 0.7.11 metadata is broken on PyPI/mirrors. fnOS ships python312, so 3.13+
+# is irrelevant here.
+sed -i 's/^requires-python = ">=3.11,<4.0"$/requires-python = ">=3.11,<3.13"/' \
+    "${FPK_DIR}/app/langbot/pyproject.toml"
+
 # --- 2.5 Download bundled uv binary (offline install on NAS) ---
 # Python comes from the official python312 App Store app (see manifest
 # install_dep_apps); only uv is carried in the package. The download is a

@@ -40,7 +40,7 @@
         "items": [
             {
                 "type": "tips",
-                "helpText": "安装完成后，LangBot 首次启动约需 5-10 分钟完成依赖部署与初始化，部署完成后即可打开网页端使用。"
+                "helpText": "<h3>⚠️ 重要提示</h3><hr/><p style=\"font-size:16px;line-height:1.9;\">安装完成后，LangBot 首次启动约需<br/><strong style=\"font-size:20px;color:#cf1322;\">⏱ 5～10 分钟</strong><br/>完成依赖部署与初始化，请耐心等待，<br/>部署完成后即可打开网页端使用。</p>"
             }
         ]
     }

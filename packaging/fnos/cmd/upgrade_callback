@@ -15,6 +15,9 @@ export HOME="${DATA_DIR}/.home"
 export UV_CACHE_DIR="${DATA_DIR}/.cache/uv"
 # Never download a managed CPython — distro Python only (see install_callback)
 export UV_PYTHON_DOWNLOADS=never
+# Tsinghua TUNA PyPI mirror + fast failure on dead connections (see install_callback)
+export UV_DEFAULT_INDEX="https://pypi.tuna.tsinghua.edu.cn/simple"
+export UV_HTTP_TIMEOUT=60
 export UV_PROJECT_ENVIRONMENT="${VENV_DIR}"
 mkdir -p "${HOME}" "${UV_CACHE_DIR}" "${DATA_DIR}/logs" || {
     echo "Data share not writable: ${DATA_DIR}" > "${TRIM_TEMP_LOGFILE}"
@@ -65,8 +68,9 @@ PYTHON_BIN="/var/apps/python312/target/bin/python3"
 }
 
 # Re-sync deps (venv lives at ${DATA_DIR}/.venv, see install_callback)
+# --no-dev: runtime dependencies only (see install_callback).
 if [ -d "${VENV_DIR}" ]; then
-    UV_PROJECT_ENVIRONMENT="${VENV_DIR}" "${UV_BIN}" sync --extra seekdb >> "${DEBUG_LOG}" 2>&1 || {
+    UV_PROJECT_ENVIRONMENT="${VENV_DIR}" "${UV_BIN}" sync --no-dev --extra seekdb >> "${DEBUG_LOG}" 2>&1 || {
         echo "Dependency sync failed after upgrade. See ${DEBUG_LOG}" > "${TRIM_TEMP_LOGFILE}"
         exit 1
     }
@@ -76,7 +80,7 @@ else
         echo "Failed to recreate virtual environment. See ${DEBUG_LOG}" > "${TRIM_TEMP_LOGFILE}"
         exit 1
     }
-    UV_PROJECT_ENVIRONMENT="${VENV_DIR}" "${UV_BIN}" sync --extra seekdb >> "${DEBUG_LOG}" 2>&1 || {
+    UV_PROJECT_ENVIRONMENT="${VENV_DIR}" "${UV_BIN}" sync --no-dev --extra seekdb >> "${DEBUG_LOG}" 2>&1 || {
         echo "Dependency sync failed. See ${DEBUG_LOG}" > "${TRIM_TEMP_LOGFILE}"
         exit 1
     }
